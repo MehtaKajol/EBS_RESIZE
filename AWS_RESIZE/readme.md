@@ -11,7 +11,7 @@ The following are the steps to follow to achieve the Target to Resize the EBS vo
 4. Lambda function will call the Step function where the Process of EBS Resize is implemented.
 5. Step Function: Check OS, Map the Volume, Take Snapshot, Modify EBS, Partitions the volume to be able to use the new size.
 
-Step-by-Step Explanation:
+## Step-by-Step Explanation:
 1. Set up Cloudwatch Alarm:  
 	* Create an Instance(Windows/Linux)
 	* Run Commands through System Manager, so the Instance is managed by SSM.
@@ -95,57 +95,51 @@ Step-by-Step Explanation:
 		* This Output is been passed to the next Lambda function, which is Modify_EBS
 
 	* Modify_EBS:
-This Lambda function modifies the Size of the Instance.
-Below Link is the code snippet to modify_EBS:
-https://github.com/MehtaKajol/EBS_RESIZE/blob/main/AWS_RESIZE/Modify_EBS.py 
-We define the Percentage Increase as Environment variable, INCREASE_PERCENTAGE: “0.1”
-In this function, we also take a Snapshot of the Instance before Resizing it.
-Output of the above code is:
-{
-  "Instance_ID": "i-048a40d07a753e961",
-  "SSM_Document_Name_Windows": "ssm_ebs_mapping_windows",
-  "SSM_Document_Name_Linux": "ssm_ebs_mapping_linux",
-  "OS_Result": "windows",
-  "SSM_Result": {
-    "Instance_ID": "i-048a40d07a753e961",
-    "Device": "/dev/sda1",
-    "EbsVolumeId": "vol-0caedb056aec8d465",
-    "DriveLetter": "C"
-  },
-  "MODIFY_EBSResult": {
-    "SnapshotId": "snap-0423b4ad66d88cc25",
-    "NewSize": 33
-  }
-}
+		* This Lambda function modifies the Size of the Instance.
+		* Refer Modify_eBS.py for Code Snippet.
+		* We define the Percentage Increase as Environment variable, INCREASE_PERCENTAGE: “0.1”
+		* In this function, we also take a Snapshot of the Instance before Resizing it.
+		* Output of the above code is:
+		{
+		  "Instance_ID": "i-048a40d07a753e961",
+		  "SSM_Document_Name_Windows": "ssm_ebs_mapping_windows",
+		  "SSM_Document_Name_Linux": "ssm_ebs_mapping_linux",
+		  "OS_Result": "windows",
+		  "SSM_Result": {
+		    "Instance_ID": "i-048a40d07a753e961",
+		    "Device": "/dev/sda1",
+		    "EbsVolumeId": "vol-0caedb056aec8d465",
+		    "DriveLetter": "C"
+		  },
+		  "MODIFY_EBSResult": {
+		    "SnapshotId": "snap-0423b4ad66d88cc25",
+		    "NewSize": 33
+		  }
+		}
+		* EBS has been resized by 0.1% and New size is displayed in the output.
+		* This Output is passed to the next Lambda function.
 
+	* SSM_Partition:
+		* Based on the OS it decides which state to execute, Windows/Linux
+		* This Lambda function is used to partition the Volume to use the New Size.
+		* This is the same code as SSM_MAPPING.Refer Excute_SSM.py for code snippet.
 
-EBS has been resized by 0.1% and New size is displayed in the output.
-This Output is passed to the next Lambda function.
+	* Publis_SNS:
+		* This SNS is invoked when the volume of Instance Reaches 100GB.
+  		* Create a SNS topic and Select Endpoint as your Mail ID, so you can receive mail when the Volume reaches 100 GB.
 
-SSM_Partition:
-Based on the OS it decides which state to execute, Windows/Linux
-This Lambda function is used to partition the Volume to use the New Size.
-This is the same code as SSM_MAPPING.
-https://github.com/MehtaKajol/EBS_RESIZE/blob/main/AWS_RESIZE/Execute_SSM.py 
+### Code Snippet for Step Function:
+* Define proper function ARN for each Step.
+* Refer Step_Fucntion.json for Code Nsippet.
 
-Publis_SNS:
-This SNS is invoked when the volume of Instance Reaches 100GB.
-Create a SNS topic and Select Endpoint as your Mail ID, so you can receive mail when the Volume reaches 100 GB.
+### SYSTEM MANAGER:
+* Open the System Manager Console, Go to Documents.
+* Create two different Documents: ssm_ebs_mapping_windows, ssm_ebs_partition_windows
+	* ssm_ebs_mapping_windows: This Document is created for all the OS, Linux/MAC/Windows. Used to Map the OS to the instance.
+	* Refer ssm_ebs_mapping_windows.txt for the text to be added to document.
+	* ssm_ebs_partition_windows: This document is used to partition the New Size, so we can use it. This Document is particularly for Windows OS
+	* Refer ssm_ebs_partition_windows.txt for the text to be added to document.
 
-Code Snippet for Step Function:
-Define proper function ARN for each Step.
-Below link is the code Snippet for Step Function:
-https://github.com/MehtaKajol/EBS_RESIZE/blob/main/AWS_RESIZE/Step_Function.json 
-SYSTEM MANAGER:
-Open the System Manager Console, Go to Documents.
-Create two different Documents: ssm_ebs_mapping_windows, ssm_ebs_partition_windows
-
-ssm_ebs_mapping_windows: This Document is created for all the OS, Linux/MAC/Windows. Used to Map the OS to the instance.
-Below link is the attached content of the Document:
-https://github.com/MehtaKajol/EBS_RESIZE/blob/main/AWS_RESIZE/ssm_ebs_mapping_windows.txt 
-ssm_ebs_partition_windows: This document is used to partition the New Size, so we can use it. This Document is particularly for Windows OS
-Below link is the attached content of the Document:
-https://github.com/MehtaKajol/EBS_RESIZE/blob/main/AWS_RESIZE/ssm_ebs_partition_windows.txt 
-Conclusion:
+## Conclusion:
 In this Article, we have seen how we can resize the EBS Volume automatically. Here we have seen end-to-end explanations on how each step is followed. 
 The Error which we can face in the process is the “Execution Timed Out Error”, where we need to configure the time for each Lambda function. We can rely on this automation to automatically add additional EBS capacity as needed.
