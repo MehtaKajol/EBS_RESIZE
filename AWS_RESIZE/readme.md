@@ -11,6 +11,8 @@ The following are the steps to follow to achieve the Target to Resize the EBS vo
 4. Lambda function will call the Step function where the Process of EBS Resize is implemented.
 5. Step Function: Check OS, Map the Volume, Take Snapshot, Modify EBS, Partitions the volume to be able to use the new size.
 
+![Alt text](step_function.png?raw=true)
+
 ## Step-by-Step Explanation:
 1. Set up Cloudwatch Alarm:  
 	* Create an Instance(Windows/Linux)
@@ -127,7 +129,6 @@ The following are the steps to follow to achieve the Target to Resize the EBS vo
 	* Publis_SNS:
 		* This SNS is invoked when the volume of Instance Reaches 100GB.
   		* Create a SNS topic and Select Endpoint as your Mail ID, so you can receive mail when the Volume reaches 100 GB.
-![Alt text](step_function.png?raw=true)
 
 ### Code Snippet for Step Function:
 * Define proper function ARN for each Step.
