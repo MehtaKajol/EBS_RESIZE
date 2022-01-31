@@ -49,6 +49,7 @@ The following are the steps to follow to achieve the Target to Resize the EBS vo
 	* Refer Execution_state.py for Code Snippet.
 
 4. Step Function:
+	![Alt text](step_function.png?raw=true)
 	* Check_OS:
 		* This is Lambda code where the user identifies the OS of the Server(Instance) we are using to Resize.
 		* Same IAM Role Policy is used here as well, as used in the above Lambda function.
