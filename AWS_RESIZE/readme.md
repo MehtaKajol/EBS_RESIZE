@@ -1,4 +1,4 @@
-Automate EBS Resize
+																																		Automate EBS Resize
 Introduction:
 In this Article, we will go through step-by-step functionality of how to automatically increase the Size of EBS when it reaches its threshold.
 
