@@ -15,25 +15,25 @@ Step-by-Step Explanation:
 1. Set up Cloudwatch Alarm:  
 	* Create an Instance(Windows/Linux)
 	* Run Commands through System Manager, so the Instance is managed by SSM.
-		Commands to Run: AWS-ConfigureAWSPackage, AmazonCloudWatch-ManageAgent
+		** Commands to Run: AWS-ConfigureAWSPackage, AmazonCloudWatch-ManageAgent
 	* Steps to Execute Command in SSM:
-		Create Parameter under System Manager, by providing the Name as “Config” and add value. Refer config.txt file for value
-		Go to Run Command under System Manager, click on Run command Select AWS-ConfigureAWSPackage first from the list of predefined Packages.
-		Enter the Name as “AmazonCloudWatchAgent”, Version as “Latest”
-		Under “Targets” Select “Choose Instance Manually” and Select the Instance for which we would want to do the Automation.
-		Uncheck the Option to Enable S3 Bucket under “Output Options”. 
-		Click on Run. This will execute the Command.
+		** Create Parameter under System Manager, by providing the Name as “Config” and add value. Refer config.txt file for value
+		** Go to Run Command under System Manager, click on Run command Select AWS-ConfigureAWSPackage first from the list of predefined Packages.
+		** Enter the Name as “AmazonCloudWatchAgent”, Version as “Latest”
+		** Under “Targets” Select “Choose Instance Manually” and Select the Instance for which we would want to do the Automation.
+		** Uncheck the Option to Enable S3 Bucket under “Output Options”. 
+		** Click on Run. This will execute the Command.
 	* Select AmazonCloudWatch-ManageAgent Second and follow the steps to Execute this command
-		Enter the “Optional Configuration Location” as “Config”, the parameter created in the parameter store.
-		Under “Targets” Select “Choose Instance Manually” and Select the Instance for which we would want to do the Automation.
-		Uncheck the Option to Enable S3 Bucket under “Output Options”. 
-		Click on Run. This will execute the Command.
+		** Enter the “Optional Configuration Location” as “Config”, the parameter created in the parameter store.
+		** Under “Targets” Select “Choose Instance Manually” and Select the Instance for which we would want to do the Automation.
+		** Uncheck the Option to Enable S3 Bucket under “Output Options”. 
+		** Click on Run. This will execute the Command.
 	* Once both the Commands are executed Successfully we can Open the Cloudwatch Console. Create Alarm.
-		Select Metric-> Browse-> CW Agent-> ImageId, InstanceId, InstanceType, instance, objectname-> Select the Instance with LogicalDisk % Free Space Metric-> Select Metric.
-		All details pop up with a graphical representation of that Instance for the particular Metric.
-		Define the Condition based on your Requirement.Click Next.
-		Select an SNS Topic, which the Cloudwatch should Trigger. Will create SNS Topic in further Steps. Click Next
-		Set Alarm Name. Click Next, check the details and Click on Create Alarm. Alarm is successfully created and will trigger when it reaches the Condition set.
+		** Select Metric-> Browse-> CW Agent-> ImageId, InstanceId, InstanceType, instance, objectname-> Select the Instance with LogicalDisk % Free Space Metric-> Select Metric.
+		** All details pop up with a graphical representation of that Instance for the particular Metric.
+		** Define the Condition based on your Requirement.Click Next.
+		** Select an SNS Topic, which the Cloudwatch should Trigger. Will create SNS Topic in further Steps. Click Next
+		** Set Alarm Name. Click Next, check the details and Click on Create Alarm. Alarm is successfully created and will trigger when it reaches the Condition set.
 
 2. SNS Topic:
 	* Open SNS Topic Console, Create Topic
@@ -50,9 +50,9 @@ Step-by-Step Explanation:
 
 4. Step Function:
 	* Check_OS:
-		This is Lambda code where the user identifies the OS of the Server(Instance) we are using to Resize.
-		Same IAM Role Policy is used here as well, as used in the above Lambda function.
-		Refer Check_os.py for code snippet.
+		** This is Lambda code where the user identifies the OS of the Server(Instance) we are using to Resize.
+		** Same IAM Role Policy is used here as well, as used in the above Lambda function.
+		** Refer Check_os.py for code snippet.
 The Input of this Lambda function will be 
 {
   "Instance_ID": "i-048a40d07a753e961",
@@ -69,10 +69,10 @@ The output of this Lambda function will be
 }
 
 	* Choice State Over OS:
-Check the Os of the Instance and Execute the Next step accordingly
-SSM_GET_MAPPING:
-This is a Lambda function, where the instance is mapped with the Volume ID, Drive Letter and Device
-The code runs send_command to get the Details of the Volume. To execute send_command we need to have documents in SSM which we will discuss in the later part of the Article.
+		** Check the Os of the Instance and Execute the Next step accordingly
+	* SSM_GET_MAPPING:
+		** This is a Lambda function, where the instance is mapped with the Volume ID, Drive Letter and Device
+		** The code runs send_command to get the Details of the Volume. To execute send_command we need to have documents in SSM which we will discuss in the later part of the Article.
 Below Link has the Code snippet for SSM_Mapping:
 https://github.com/MehtaKajol/EBS_RESIZE/blob/main/AWS_RESIZE/Execute_SSM.py 
 Input the function is passed from the check_OS lambda code
