@@ -132,7 +132,7 @@ The following are the steps to follow to achieve the Target to Resize the EBS vo
 
 ### Code Snippet for Step Function:
 * Define proper function ARN for each Step.
-* Refer [This dcoument for Code Snippet](https://github.com/MehtaKajol/EBS_RESIZE/blob/main/Step_Function.json).
+* Refer [This document for Code Snippet](https://github.com/MehtaKajol/EBS_RESIZE/blob/main/Step_Function.json).
 
 ### SYSTEM MANAGER:
 * Open the System Manager Console, Go to Documents.
