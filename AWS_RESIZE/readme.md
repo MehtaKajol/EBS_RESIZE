@@ -1,5 +1,5 @@
 # Automate EBS Resize
-# Introduction:
+## Introduction:
 In this Article, we will go through step-by-step functionality of how to automatically increase the Size of EBS when it reaches its threshold.
 
 Modifying the volume is relatively easy, the tricky part is extending the file system to take advantage of the additional storage. Typically, this is done manually on the OS, but if AWS Systems Manager manages your instances, it’s possible to use AWS Lambda to send Systems Manager commands that run OS-level scripts.
@@ -13,88 +13,52 @@ The following are the steps to follow to achieve the Target to Resize the EBS vo
 
 Step-by-Step Explanation:
 1. Set up Cloudwatch Alarm:  
-	Create an Instance(Windows/Linux)
-	Run Commands through System Manager, so the Instance is managed by SSM.
+	*Create an Instance(Windows/Linux)
+	*Run Commands through System Manager, so the Instance is managed by SSM.
 		Commands to Run: AWS-ConfigureAWSPackage, AmazonCloudWatch-ManageAgent
-	Steps to Execute Command in SSM:
+	*Steps to Execute Command in SSM:
 		Create Parameter under System Manager, by providing the Name as “Config” and add value. Refer config.txt file for value
 		Go to Run Command under System Manager, click on Run command Select AWS-ConfigureAWSPackage first from the list of predefined Packages.
 		Enter the Name as “AmazonCloudWatchAgent”, Version as “Latest”
-Under “Targets” Select “Choose Instance Manually” and Select the Instance for which we would want to do the Automation.
-Uncheck the Option to Enable S3 Bucket under “Output Options”. 
-Click on Run. This will execute the Command.
-Select AmazonCloudWatch-ManageAgent Second and follow the steps to Execute this command
-Enter the “Optional Configuration Location” as “Config”, the parameter created in the parameter store.
-Under “Targets” Select “Choose Instance Manually” and Select the Instance for which we would want to do the Automation.
-Uncheck the Option to Enable S3 Bucket under “Output Options”. 
-Click on Run. This will execute the Command.
-Once both the Commands are executed Successfully we can Open the Cloudwatch Console. Create Alarm.
-Select Metric-> Browse-> CW Agent-> ImageId, InstanceId, InstanceType, instance, objectname-> Select the Instance with LogicalDisk % Free Space Metric-> Select Metric.
-All details pop up with a graphical representation of that Instance for the particular Metric.
-Define the Condition based on your Requirement.Click Next.
-Select an SNS Topic, which the Cloudwatch should Trigger. Will create SNS Topic in further Steps. Click Next
-Set Alarm Name. Click Next, check the details and Click on Create Alarm. Alarm is successfully created and will trigger when it reaches the Condition set.
+		Under “Targets” Select “Choose Instance Manually” and Select the Instance for which we would want to do the Automation.
+		Uncheck the Option to Enable S3 Bucket under “Output Options”. 
+		Click on Run. This will execute the Command.
+	*Select AmazonCloudWatch-ManageAgent Second and follow the steps to Execute this command
+		Enter the “Optional Configuration Location” as “Config”, the parameter created in the parameter store.
+		Under “Targets” Select “Choose Instance Manually” and Select the Instance for which we would want to do the Automation.
+		Uncheck the Option to Enable S3 Bucket under “Output Options”. 
+		Click on Run. This will execute the Command.
+	*Once both the Commands are executed Successfully we can Open the Cloudwatch Console. Create Alarm.
+		Select Metric-> Browse-> CW Agent-> ImageId, InstanceId, InstanceType, instance, objectname-> Select the Instance with LogicalDisk % Free Space Metric-> Select Metric.
+		All details pop up with a graphical representation of that Instance for the particular Metric.
+		Define the Condition based on your Requirement.Click Next.
+		Select an SNS Topic, which the Cloudwatch should Trigger. Will create SNS Topic in further Steps. Click Next
+		Set Alarm Name. Click Next, check the details and Click on Create Alarm. Alarm is successfully created and will trigger when it reaches the Condition set.
 
-SNS Topic:
-Open SNS Topic Console, Create Topic
-Under the Topic Create Subscription, Protocol as AWS Lambda and Specify the Lambda Function to invoke in Endpoint.
+2. SNS Topic:
+	*Open SNS Topic Console, Create Topic
+	*Under the Topic Create Subscription, Protocol as AWS Lambda and Specify the Lambda Function to invoke in Endpoint.
 
-Lambda Function to Invoke the Step-Function:
-Open Lambda Console, Create Function
-Enter the function Name, Select Python 3.9, create IAM Role with following policies and attach that role to all the Lambda Function. Please check the attached link to check for IAM Policies:
-https://github.com/MehtaKajol/EBS_RESIZE/blob/main/AWS_RESIZE/IAM_Role.txt 
-Click on Create Function, will redirect to the Function page with Basic Lambda Code, copy the below Lambda code and paste it in the console
-This is the Lambda function which has been triggered by the SNS.
-This Lambda code in return will trigger the Step function where all the steps for Modifying the EBS Resize will take place.
-Environmental Variables passed- SSM_DOCUMENT_LINUX: “ssm_ebs_mapping_linux”, SSM_DOCUMENT_WINDOWS: “ssm_ebs_mapping_windows”, STATE_MACHINE_ARN: “arn:aws:states:us-east-2:826906654403:stateMachine:EBS_resize”
-Below Link has the code Snippet for Executing Step Function: 
-https://github.com/MehtaKajol/EBS_RESIZE/blob/main/AWS_RESIZE/Execution_state.py 
+3. Lambda Function to Invoke the Step-Function:
+	*Open Lambda Console, Create Function
+	*Enter the function Name, Select Python 3.9, create IAM Role with following policies and attach that role to all the Lambda Function. Please follow Iam_Role.txt document.
+	*Click on Create Function, will redirect to the Function page with Basic Lambda Code, copy the below Lambda code and paste it in the console
+	*This is the Lambda function which has been triggered by the SNS.
+	*This Lambda code in return will trigger the Step function where all the steps for Modifying the EBS Resize will take place.
+	*Environmental Variables passed- SSM_DOCUMENT_LINUX: “ssm_ebs_mapping_linux”, SSM_DOCUMENT_WINDOWS: “ssm_ebs_mapping_windows”, STATE_MACHINE_ARN:“arn:aws:states:us-east-2:826906654403:stateMachine:EBS_resize”
+	*Refer Execution_state.py for Code Snippet.
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-Step Function:
-
-
-
-
-Check_OS:
-This is Lambda code where the user identifies the OS of the Server(Instance) we are using to Resize.
-Same IAM Role Policy is used here as well, as used in the above Lambda function
-Below Link has the Code snippet to identify the OS we are using.
-https://github.com/MehtaKajol/EBS_RESIZE/blob/main/AWS_RESIZE/Check_OS.py 
+4. Step Function:
+	*Check_OS:
+		This is Lambda code where the user identifies the OS of the Server(Instance) we are using to Resize.
+		Same IAM Role Policy is used here as well, as used in the above Lambda function.
+		Refer Check_os.py for code snippet.
 The Input of this Lambda function will be 
 {
   "Instance_ID": "i-048a40d07a753e961",
   "SSM_Document_Name_Windows": "ssm_ebs_mapping_windows",
   "SSM_Document_Name_Linux": "ssm_ebs_mapping_linux"
 }
-
 
 The output of this Lambda function will be 
 {
@@ -104,7 +68,7 @@ The output of this Lambda function will be
   "OS_Result": "windows"
 }
 
-Choice State Over OS:
+	*Choice State Over OS:
 Check the Os of the Instance and Execute the Next step accordingly
 SSM_GET_MAPPING:
 This is a Lambda function, where the instance is mapped with the Volume ID, Drive Letter and Device
