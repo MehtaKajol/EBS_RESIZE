@@ -140,6 +140,10 @@ The following are the steps to follow to achieve the Target to Resize the EBS vo
 	* ssm_ebs_partition_windows: This document is used to partition the New Size, so we can use it. This Document is particularly for Windows OS
 	* Refer ssm_ebs_partition_windows.txt for the text to be added to document.
 
+### Supporting Links:
+https://github.com/Road-To-FinOps-Deploy/aws_tf_ebs_resize 
+https://aws.amazon.com/blogs/storage/automating-amazon-ebs-volume-resizing-with-aws-step-functions-and-aws-systems-manager/
+
 ## Conclusion:
 In this Article, we have seen how we can resize the EBS Volume automatically. Here we have seen end-to-end explanations on how each step is followed. 
 The Error which we can face in the process is the “Execution Timed Out Error”, where we need to configure the time for each Lambda function. We can rely on this automation to automatically add additional EBS capacity as needed.
