@@ -2,7 +2,7 @@
 ## Introduction:
 In this Article, we will go through step-by-step functionality of how to automatically increase the Size of EBS when it reaches its threshold.
 
-Modifying the volume is relatively easy, the tricky part is extending the file system to take advantage of the additional storage. Typically, this is done manually on the OS, but if AWS Systems Manager manages your instances, it’s possible to use AWS Lambda to send Systems Manager commands that run OS-level scripts.
+If the AWS System Manager handles the Instances it becomes bit easier to resize the Volume and also modifying the file system to use the storage.
 
 The following are the steps to follow to achieve the Target to Resize the EBS volume:
 1. Set a Cloudwatch Alarm to Trigger when volume reaches its threshold.
