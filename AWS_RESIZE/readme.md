@@ -1,5 +1,5 @@
-																												Automate EBS Resize
-Introduction:
+#Automate EBS Resize
+#Introduction:
 In this Article, we will go through step-by-step functionality of how to automatically increase the Size of EBS when it reaches its threshold.
 
 Modifying the volume is relatively easy, the tricky part is extending the file system to take advantage of the additional storage. Typically, this is done manually on the OS, but if AWS Systems Manager manages your instances, it’s possible to use AWS Lambda to send Systems Manager commands that run OS-level scripts.
