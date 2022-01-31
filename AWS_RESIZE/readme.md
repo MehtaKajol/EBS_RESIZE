@@ -49,7 +49,6 @@ The following are the steps to follow to achieve the Target to Resize the EBS vo
 	* Refer Execution_state.py for Code Snippet.
 
 4. Step Function:
-	![Alt text](step_function.png?raw=true)
 	* Check_OS:
 		* This is Lambda code where the user identifies the OS of the Server(Instance) we are using to Resize.
 		* Same IAM Role Policy is used here as well, as used in the above Lambda function.
@@ -128,6 +127,7 @@ The following are the steps to follow to achieve the Target to Resize the EBS vo
 	* Publis_SNS:
 		* This SNS is invoked when the volume of Instance Reaches 100GB.
   		* Create a SNS topic and Select Endpoint as your Mail ID, so you can receive mail when the Volume reaches 100 GB.
+![Alt text](step_function.png?raw=true)
 
 ### Code Snippet for Step Function:
 * Define proper function ARN for each Step.
