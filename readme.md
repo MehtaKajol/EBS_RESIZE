@@ -19,7 +19,7 @@ The following are the steps to follow to achieve the Target to Resize the EBS vo
 	* Run Commands through System Manager, so the Instance is managed by SSM.
 		* Commands to Run: AWS-ConfigureAWSPackage, AmazonCloudWatch-ManageAgent
 	* Steps to Execute Command in SSM:
-		* Create Parameter under System Manager, by providing the Name as “Config” and add value. Refer [This file(https://github.com/MehtaKajol/EBS_RESIZE/blob/main/congif.txt)]
+		* Create Parameter under System Manager, by providing the Name as “Config” and add value. Refer [This file](https://github.com/MehtaKajol/EBS_RESIZE/blob/main/congif.txt)
 		* Go to Run Command under System Manager, click on Run command Select AWS-ConfigureAWSPackage first from the list of predefined Packages.
 		* Enter the Name as “AmazonCloudWatchAgent”, Version as “Latest”
 		* Under “Targets” Select “Choose Instance Manually” and Select the Instance for which we would want to do the Automation.
@@ -43,18 +43,18 @@ The following are the steps to follow to achieve the Target to Resize the EBS vo
 
 3. Lambda Function to Invoke the Step-Function:
 	* Open Lambda Console, Create Function
-	* Enter the function Name, Select Python 3.9, create IAM Role with following policies and attach that role to all the Lambda Function. Please follow [This(https://github.com/MehtaKajol/EBS_RESIZE/blob/main/IAM_Role.txt)] document.
+	* Enter the function Name, Select Python 3.9, create IAM Role with following policies and attach that role to all the Lambda Function. [Please follow this](https://github.com/MehtaKajol/EBS_RESIZE/blob/main/IAM_Role.txt) document.
 	* Click on Create Function, will redirect to the Function page with Basic Lambda Code, copy the below Lambda code and paste it in the console
 	* This is the Lambda function which has been triggered by the SNS.
 	* This Lambda code in return will trigger the Step function where all the steps for Modifying the EBS Resize will take place.
 	* Environmental Variables passed- SSM_DOCUMENT_LINUX: “ssm_ebs_mapping_linux”, SSM_DOCUMENT_WINDOWS: “ssm_ebs_mapping_windows”, STATE_MACHINE_ARN:“arn:aws:states:us-east-2:826906654403:stateMachine:EBS_resize”
-	* Refer [This File(https://github.com/MehtaKajol/EBS_RESIZE/blob/main/Execution_state.py)]
+	* [Refer This File](https://github.com/MehtaKajol/EBS_RESIZE/blob/main/Execution_state.py)
 
 4. Step Function:
 	* Check_OS:
 		* This is Lambda code where the user identifies the OS of the Server(Instance) we are using to Resize.
 		* Same IAM Role Policy is used here as well, as used in the above Lambda function.
-		* Refer [This File(https://github.com/MehtaKajol/EBS_RESIZE/blob/main/Check_OS.py)].
+		* Refer [This File](https://github.com/MehtaKajol/EBS_RESIZE/blob/main/Check_OS.py).
 		* The Input of this Lambda function will be 
 		{
   		  "Instance_ID": "i-xxx",
@@ -73,7 +73,7 @@ The following are the steps to follow to achieve the Target to Resize the EBS vo
 	* SSM_GET_MAPPING:
 		* This is a Lambda function, where the instance is mapped with the Volume ID, Drive Letter and Device
 		* The code runs send_command to get the Details of the Volume. To execute send_command we need to have documents in SSM which we will discuss in the later part of the Article.
-		* Refer [This File(https://github.com/MehtaKajol/EBS_RESIZE/blob/main/Execute_SSM.py)]
+		* Refer [This File](https://github.com/MehtaKajol/EBS_RESIZE/blob/main/Execute_SSM.py)
 		* Input the function is passed from the check_OS lambda code
 		{
   		  "Instance_ID": "i-048a40d07a753e961",
@@ -98,7 +98,7 @@ The following are the steps to follow to achieve the Target to Resize the EBS vo
 
 	* Modify_EBS:
 		* This Lambda function modifies the Size of the Instance.
-		* Refer [This Document for Code Snippet(https://github.com/MehtaKajol/EBS_RESIZE/blob/main/Modify_EBS.py)].
+		* Refer [This Document for Code Snippet](https://github.com/MehtaKajol/EBS_RESIZE/blob/main/Modify_EBS.py).
 		* We define the Percentage Increase as Environment variable, INCREASE_PERCENTAGE: “0.1”
 		* In this function, we also take a Snapshot of the Instance before Resizing it.
 		* Output of the above code is:
@@ -132,15 +132,15 @@ The following are the steps to follow to achieve the Target to Resize the EBS vo
 
 ### Code Snippet for Step Function:
 * Define proper function ARN for each Step.
-* Refer [This dcoument for Code Snippet(https://github.com/MehtaKajol/EBS_RESIZE/blob/main/Step_Function.json)].
+* Refer [This dcoument for Code Snippet](https://github.com/MehtaKajol/EBS_RESIZE/blob/main/Step_Function.json).
 
 ### SYSTEM MANAGER:
 * Open the System Manager Console, Go to Documents.
 * Create two different Documents: ssm_ebs_mapping_windows, ssm_ebs_partition_windows
 	* ssm_ebs_mapping_windows: This Document is created for all the OS, Linux/MAC/Windows. Used to Map the OS to the instance.
-	* Refer [This Document for the text(https://github.com/MehtaKajol/EBS_RESIZE/blob/main/ssm_ebs_mapping_windows.json)].
+	* Refer [This Document for the text](https://github.com/MehtaKajol/EBS_RESIZE/blob/main/ssm_ebs_mapping_windows.json).
 	* ssm_ebs_partition_windows: This document is used to partition the New Size, so we can use it. This Document is particularly for Windows OS
-	* Refer [This Document for the text(https://github.com/MehtaKajol/EBS_RESIZE/blob/main/ssm_ebs_partition_windows.json)].
+	* Refer [This Document for the text](https://github.com/MehtaKajol/EBS_RESIZE/blob/main/ssm_ebs_partition_windows.json).
 
 ### Supporting Links:
 * https://github.com/Road-To-FinOps-Deploy/aws_tf_ebs_resize 
