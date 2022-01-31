@@ -1,0 +1,24 @@
+{
+  "schemaVersion": "2.2",
+  "description": "partition Volumes",
+  "mainSteps": [
+    {
+      "name": "PartitionVolumesMappingWindows",
+      "action": "aws:runPowerShellScript",
+      "precondition": {
+        "StringEquals": [
+          "platformType",
+          "Windows"
+        ]
+      },
+      "inputs": {
+        "runCommand": [
+          "Write-Verbose 'Startig to partition extension.'",
+          "$MaxSize = (Get-PartitionSupportedSize -DriveLetter c).sizeMax",
+          "Resize-Partition -DriveLetter c -Size $MaxSize"
+        ]
+      }
+    }
+  ]
+}
+
