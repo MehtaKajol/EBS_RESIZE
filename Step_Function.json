@@ -1,0 +1,157 @@
+{
+    "StartAt": "CHECK_OS",
+    "States": {
+      "CHECK_OS": {
+        "Type": "Task",
+        "Resource": "arn:aws:lambda:us-east-2:826906654403:function:Check_Os",
+        "Next": "ChoiceStateoverOS",
+        "ResultPath": "$.OS_Result",
+        "Catch": [
+            {
+               "ErrorEquals": ["States.ALL"],
+               "Next": "FailState"
+            }
+         ]
+      },
+      "ChoiceStateoverOS": {
+        "Type": "Choice",
+        "Choices": [
+          {
+            "Variable": "$.OS_Result",
+            "StringEquals": "windows",
+            "Next": "SSM_GET_MAPPING"
+          },
+          {
+            "Variable": "$.OS_Result",
+            "StringEquals": "linux",
+            "Next": "SSM_GET_MAPPING"
+          }
+        ]
+      },
+      "SSM_GET_MAPPING": {
+        "Type": "Task",
+        "Resource": "arn:aws:lambda:us-east-2:826906654403:function:Execute_SSM",
+        "Next": "MODIFY_EBS",
+        "ResultPath": "$.SSM_Result",
+        "Catch": [
+            {
+               "ErrorEquals": ["States.ALL"],
+               "Next": "FailState"
+            }
+         ]
+      },
+      "MODIFY_EBS": {
+        "Type": "Task",
+        "Resource": "arn:aws:lambda:us-east-2:826906654403:function:Modify_EBS",
+        "Next": "ChoiceStateoverPartition",
+        "ResultPath": "$.MODIFY_EBSResult",
+        "Parameters": {
+          "Device.$": "$.SSM_Result.Device",
+          "EbsVolumeId.$": "$.SSM_Result.EbsVolumeId",
+          "DriveLetter.$": "$.SSM_Result.DriveLetter"
+        },
+        "Catch": [
+          {
+            "ErrorEquals": ["States.TaskFailed"],
+            "Next": "FailState"
+          }
+        ]
+      },
+      "ChoiceStateoverPartition": {
+        "Type": "Choice",
+        "Choices": [
+          {
+            "Variable": "$.OS_Result",
+            "StringEquals": "windows",
+            "Next": "SSM_PARTITION_WINDOWS"
+          },
+          {
+            "Variable": "$.OS_Result",
+            "StringEquals": "linux",
+            "Next": "wait_twenty_seconds"
+          }
+        ]
+      },
+      "SSM_PARTITION_WINDOWS": {
+        "Type": "Task",
+        "Resource": "arn:aws:lambda:us-east-2:826906654403:function:Execute_SSM",
+        "Next": "ChoiceStateover100email",
+        "ResultPath": "$.SSM_PARTITION_Result",
+        "Parameters": {
+          "SSM_Document_Name": "ssm_ebs_partition_windows",
+          "Instance_ID.$": "$.SSM_Result.Instance_ID"
+        },
+        "Catch": [
+            {
+               "ErrorEquals": ["States.ALL"],
+               "Next": "FailState"
+            }
+         ]
+      },
+      "wait_twenty_seconds": {
+        "Type": "Wait",
+        "Seconds": 20,
+        "Next": "SSM_PARTITION_LINUX"
+      },
+      "SSM_PARTITION_LINUX": {
+        "Type": "Task",
+        "Resource": "arn:aws:lambda:us-east-2:826906654403:function:Execute_SSM",
+        "Next": "ChoiceStateover100email",
+        "ResultPath": "$.SSM_PARTITION_Result",
+        "Parameters": {
+          "SSM_Document_Name": "ssm_ebs_partition_linux",
+          "Instance_ID.$": "$.SSM_Result.Instance_ID"
+        },
+        "Catch": [
+            {
+               "ErrorEquals": ["States.ALL"],
+               "Next": "FailState"
+            }
+         ]
+      },
+      "ChoiceStateover100email": {
+        "Type": "Choice",
+        "Choices": [
+          {
+            "Variable": "$.MODIFY_EBSResult.NewSize",
+            "NumericGreaterThanEquals": 100,
+            "Next": "PublishSNS"
+          },
+          {
+            "Variable": "$.MODIFY_EBSResult.NewSize",
+            "NumericLessThan": 100,
+            "Next": "SuccessState"
+          }
+        ]
+      },
+      "PublishSNS": {
+        "Type": "Task",
+        "Resource": "arn:aws:states:::sns:publish",
+        "ResultPath": "$.PublishSNS",
+        "Parameters": {
+          "TopicArn": "arn:aws:sns:us-east-2:826906654403:LambdaNotification:6e175147-f883-4b1f-97e8-03ae85845cb6",
+          "Message": {
+            "Device.$": "$.SSM_Result.Device",
+            "EbsVolumeId.$": "$.SSM_Result.EbsVolumeId",
+            "DriveLetter.$": "$.SSM_Result.DriveLetter",
+            "NewInstnaceSize.$":"$.MODIFY_EBSResult.NewSize"
+          }
+        },
+        "Next": "SuccessState",
+        "Catch": [
+          {
+            "ErrorEquals": [
+              "States.ALL"
+            ],
+            "Next": "FailState"
+          }
+        ]
+      },
+      "FailState": {
+        "Type": "Fail"
+      },
+      "SuccessState": {
+        "Type": "Succeed"
+      }
+    }
+  }
