@@ -131,7 +131,7 @@ The following are the steps to follow to achieve the Target to Resize the EBS vo
 
 ### Code Snippet for Step Function:
 * Define proper function ARN for each Step.
-* Refer Step_Fucntion.json for Code Nsippet.
+* Refer Step_Fucntion.json for Code Snippet.
 
 ### SYSTEM MANAGER:
 * Open the System Manager Console, Go to Documents.
