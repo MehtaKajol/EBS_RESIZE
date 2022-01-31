@@ -142,8 +142,8 @@ The following are the steps to follow to achieve the Target to Resize the EBS vo
 	* Refer ssm_ebs_partition_windows.txt for the text to be added to document.
 
 ### Supporting Links:
-https://github.com/Road-To-FinOps-Deploy/aws_tf_ebs_resize 
-https://aws.amazon.com/blogs/storage/automating-amazon-ebs-volume-resizing-with-aws-step-functions-and-aws-systems-manager/
+* https://github.com/Road-To-FinOps-Deploy/aws_tf_ebs_resize 
+* https://aws.amazon.com/blogs/storage/automating-amazon-ebs-volume-resizing-with-aws-step-functions-and-aws-systems-manager/
 
 ## Conclusion:
 In this Article, we have seen how we can resize the EBS Volume automatically. Here we have seen end-to-end explanations on how each step is followed. 
