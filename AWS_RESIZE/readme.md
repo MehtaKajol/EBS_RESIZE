@@ -5,19 +5,18 @@ In this Article, we will go through step-by-step functionality of how to automat
 Modifying the volume is relatively easy, the tricky part is extending the file system to take advantage of the additional storage. Typically, this is done manually on the OS, but if AWS Systems Manager manages your instances, it’s possible to use AWS Lambda to send Systems Manager commands that run OS-level scripts.
 
 The following are the steps to follow to achieve the Target to Resize the EBS volume:
-Set a Cloudwatch Alarm to Trigger when volume reaches its threshold.
-Create an SNS Topic which will be triggered by cloudwatch Alarm.
-SNS Topic in-return should trigger the Lambda function passing Instance-ID from cloudwatch alarm
-Lambda function will call the Step function where the Process of EBS Resize is implemented.
-Step Function: Check OS, Map the Volume, Take Snapshot, Modify EBS, Partitions the volume to be able to use the new size.
+1. Set a Cloudwatch Alarm to Trigger when volume reaches its threshold.
+2. Create an SNS Topic which will be triggered by cloudwatch Alarm.
+3. SNS Topic in-return should trigger the Lambda function passing Instance-ID from cloudwatch alarm
+4. Lambda function will call the Step function where the Process of EBS Resize is implemented.
+5. Step Function: Check OS, Map the Volume, Take Snapshot, Modify EBS, Partitions the volume to be able to use the new size.
 Step-by-Step Explanation:
 Set up Cloudwatch Alarm:  
 Create an Instance(Windows/Linux)
 Run Commands through System Manager, so the Instance is managed by SSM.
 Commands to Run: AWS-ConfigureAWSPackage, AmazonCloudWatch-ManageAgent
 Steps to Execute Command in SSM:
-Create Parameter under System Manager, by providing the Name as “Config” and value as the below attached link content:
-https://github.com/MehtaKajol/EBS_RESIZE/blob/main/AWS_RESIZE/congif.txt 
+Create Parameter under System Manager, by providing the Name as “Config” and add value. Refer config.txt file for value
 Go to Run Command under System Manager, click on Run command Select AWS-ConfigureAWSPackage first from the list of predefined Packages.
 Enter the Name as “AmazonCloudWatchAgent”, Version as “Latest”
 Under “Targets” Select “Choose Instance Manually” and Select the Instance for which we would want to do the Automation.
